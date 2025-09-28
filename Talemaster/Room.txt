@@ -1,0 +1,35 @@
+/*
+A room class for the Talemaster IF engine
+by Kangasaur
+*/
+
+var id
+var name
+var description
+var exits
+var items
+var objects
+var subrooms
+var sprites
+
+var exitDirs = ["NORTH", "NORTHEAST", "EAST", "SOUTHEAST", "SOUTH", "SOUTHWEST", "WEST", "NORTHWEST", "UP, "DOWN"]
+
+
+func Init(_id)
+  id = _id
+  name = ""
+  description = ""
+  exits = ["","","","","","","","","",""]
+  items = []
+  objects = []
+  subrooms = []
+  sprites = ["","",""]
+
+func SetExit(direction, roomTo)
+  exits[exitDirs.IndexOf(string.ToUpper(direction))] = roomTo
+
+func SetSprite(layer, spritesheet)
+  sprites[layer] = spritesheet
+
+func GetExit(direction)
+  return exits[exitDirs.IndexOf(string.ToUpper(direction))]

@@ -1,0 +1,1019 @@
+import UI/MindstoneButton
+
+
+//       1         2         3         4
+//3456789012345678901234567890123456789012345678
+//'''''''|'''''''''|'''''''''|'''''''''|''''''''
+//   _______________________________________
+// |'
+// | CUSTOM COSMETICS
+// '._______________________________________
+
+var haircol = #ff2963
+var tetoEnabled = true
+var smallteto = ascii
+#,
+▼#▼
+asciiend
+
+var bigteto = ascii
+#####(
+,==..-.==.
+\~/(####~/
+#V#'###'V
+asciiend
+
+?tetoEnabled
+  ?bighead
+    >h-5,-2,@haircol@,@bigteto@
+  :
+    >h-1,0,@haircol@,@smallteto@
+
+
+
+//   _______________________________________
+// |'
+// | FUNCTIONS AND VAR INITS
+// '._______________________________________
+
+
+// Math Utils
+
+func RoundTo(num, places)
+  return math.Round(num * math.Pow(10, places))
+  ^ / math.Pow(10, places)
+
+var permaprep = false
+
+// Counteracting elements
+
+var elements = ［"ice", "fire", "aether", "vigor"
+^, "poison", "ice"］
+
+var weaponR = ""
+var weaponL = ""
+var shield = ""
+
+func GetCounter()
+  for i = 0..4
+    ?foe = elements［i］
+      return elements［i+1］
+  return ""
+
+func ToActivate(ability)
+  ?item.CanActivate() &
+  ^(item.GetCooldown(ability) <= 0 |
+  ^(item.right = ability &
+  ^item.right.state = 2))
+    return true
+  return false
+
+var combat_locs = ［"rocky","canyon","caves",
+^"mushroom","haunted","boiling","icy","temple"］
+
+func IsCombatLoc()
+  for check : combat_locs
+    ?loc = check
+      return true
+  return false
+
+
+var curtime
+curtime = time.FormatCasual(totaltime)
+var avtime
+var loottime
+?loc.loop | loc.begin
+  avtime = time.FormatCasual(loc.averageTime)
+  loottime = time.FormatCasual(loc.averageTime
+  ^ * 400)
+  ?loc = icy | loc = mushroom | loc = caves
+    brew bronze + wood
+    ?loc.begin & loc.stars > 10 //&
+   // ^loc.averageTime ! -1
+      permaprep = true
+    :
+      permaprep = false
+  :?loc = rocky
+    brew bronze + stone
+    ?loc.begin & loc.stars > 10 &
+    ^loc.averageTime ! -1
+      permaprep = true
+    :
+      permaprep = false
+  :?loc = boiling
+    brew stone
+  :
+    brew bronze + tar
+
+
+?IsCombatLoc()
+  ?totaltime <= loc.averageTime
+    >`@screen.w-string.Size(curtime)@,0,
+    ^#0f0,@curtime@
+  :
+    >`@screen.w-string.Size(curtime)@,0,
+    ^#f00,@curtime@
+  >`@screen.w-string.Size(avtime)-string.Size(
+  ^loottime)-2@,1,@avtime@, @loottime@
+  >`@screen.w-4@,2,@loc.averageTime@
+
+
+var dysmind = false
+var dyselem = ""
+
+var enoki_time = 0
+var enoki_hit_time = 0
+var last_armor = 80
+var enoki_hit_count = 0
+?loc.loop
+  enoki_hit_count = 0
+  last_armor = 0
+  enoki_time = 0
+
+func Moonjuggle(eq1, eq2)
+  ?time % 4 = 0
+    equipL @eq2@
+    equipR @eq1@
+  :?time % 4 = 1
+    equipL moon
+    equipR @eq1@
+  :?time % 4 = 2
+    equipL @eq1@
+    equipR @eq2@
+  :?time % 4 = 3
+    equipL moon
+    equipR @eq2@
+
+func Moondial(eq1, eq2)
+  ?time % 3 = 0
+    equipL moon
+    equipR @eq1@
+  :?time % 3 = 1
+    equipL moon
+    equipR @eq2@
+  :?time % 3 = 2
+    equipL @eq1@
+    equipR @eq2@
+
+/*
+// Event Currencies
+var lastBalloons = item.GetCount("warm_stone")
+var avBalloons = 0
+var balloonGains = ［］
+var balloonRate = 0
+
+?loc.loop
+  balloonGains.Add(item.GetCount("warm_stone") -
+  ^lastBalloons)
+  lastBalloons = item.GetCount("warm_stone")
+  avBalloons = 0
+  for run : balloonGains
+    avBalloons += run
+  avBalloons /= balloonGains.Count() / 1.0
+  balloonRate = avBalloons / (loc.averageTime
+  ^/ 1800.0)
+
+>`60,0,#ffff00,☼ @item.GetCount("warm_stone")@
+>`60,1,#white,+@RoundTo(avBalloons,2)@
+>`60,2,#white,@RoundTo(balloonRate,2)@/m
+*/
+
+//   _______________________________________
+// |'
+// | MAIN EQUIP CODE
+// '._______________________________________
+
+
+//AAC code
+
+?item.left.state = 3
+  equipL *0 wand
+  equipL @item.left@
+?item.right.state = 3
+  equipR throw
+  equip @item.right@
+
+
+// Talismans
+
+
+?totaltime < 120 & summon.count = 0 &
+^item.CanActivate()
+  ?loc = rocky
+    equipL fire talisman
+    activate L
+  :
+    equipL aether talisman
+    activate L
+
+
+// Pickups & Harvest
+
+:?harvest.distance < 7 & loc = rocky &
+^loc.stars = 5
+  equip shovel
+  ?item.CanActivate("shovel")
+    activate R
+:?pickup.distance < 10
+  equipL star stone
+
+// Blade
+
+:?(foe.count > 8 | (foe.count > 5 & 
+^loc.stars > 15)) & foe.distance < 30 &
+^(item.GetCooldown("blade") <= 0 & 
+^item.CanActivate()) & loc ! rocky
+  equip blade
+  activate R
+
+// At-a-distance traversal
+
+:?(foe.distance > 40 | foe.distance < 0) &
+^!permaprep
+  ?item.GetCooldown("quarterstaff") <= 0
+    equip quarterstaff
+    activate R
+  ?hp < maxhp & string.IndexOf(debuffs.string,
+  ^puff) = -1 & loc ! rocky
+    equipR compound
+    equipL ouroboros
+  :
+    equipR compound
+    equipL trisk
+
+// Wand Abilities
+
+:?item.GetCooldown("wand_stone") <= 0 &
+^foe.count > 4 & foe ! wasp
+  equipL gravity wand
+  activate L
+
+
+// ICY RIDGE
+:?loc = icy
+  activate P
+  ?permaprep
+    ?foe.distance > 23
+      equipR mask
+      ?hp < maxhp
+        equipL ouroboros
+      :
+        equipL quest
+
+    :?foe = phase
+      ?summon.count = 0 & item.CanActivate()
+        equipR mask
+        equipL fire talisman
+        activate L
+      :?foe.armor <= 0 & ToActivate("bardiche")
+        equip bardiche
+        activate R
+      :?foe.armor <= 0 & item.CanActivate() &
+      ^item.GetCooldown("mask") <= 0
+        equip mask
+        activate R
+      :?foe.state = 1
+        equipR mask
+        equipL quest
+      :?foe.distance > 10 & foe.distance < 17
+        equipR dash
+      :?foe.armor > 0
+        equipL dI sword
+        equipR mask
+      :?foe.debuffs.GetCount("chill") < 6
+        equipL dI sword
+        equipR vigor sword -shiny
+      :
+        equipL vigor sword shiny
+        equipR vigor sword -shiny
+
+    :?foe = boss
+      ?summon.count = 1
+        equipR mask
+        equipL aether talisman
+        activate L
+      :?foe.count > 1
+        equip fire cross
+      :
+        equipR mask
+        equipL fire hammer
+    :
+      equipR mask
+      ?hp < maxhp
+        equipL dL wand
+      :
+        equipL fire wand -hidden
+
+  :?foe.distance > 16
+    ?item.GetCooldown("quarterstaff") <= 0
+      equip quarterstaff
+      activate R
+      equipL trisk
+    :?hp < maxhp & foe.distance > 18
+      equipR fire shield
+      equip ouroboros
+    :
+      equipR fire shield
+      equipL trisk
+  
+  :?foe.distance > 10 & foe.distance < 17 &
+  ^item.GetCooldown("bash") <= 0 &
+  ^item.GetCooldown("mind") < 330
+    equipR bash
+  :?foe.distance > 10 & foe.distance < 17 &
+  ^item.GetCooldown("dash") <= 0 &
+  ^item.GetCooldown("mind") < 330
+    equipR dash
+
+  // Hrímnir
+  :?string.IndexOf(debuffs.string,
+  ^"yeti") ! -1
+    ?foe.distance < 8
+      ?foe.debuffs.GetCount("chill") < 6
+        equipL dI sword
+        equipR vigor sword -shiny
+      :
+        equipL vigor sword shiny
+        equipR vigor sword -shiny
+    :
+      equip fire crossbow
+
+  :?foe = phase
+    ?summon.count = 0 & item.CanActivate()
+      equipR compound
+      equipL fire talisman
+      activate L
+    //:?foe.armor <= 0 & armor > 6 &
+    //^item.GetCooldown("wand_ice") <= 0
+    //  equipR frost wand
+    //  activate R
+    :?foe.armor <= 0 & armor > 8 &
+    ^item.GetCooldown("staff_poison") <= 0
+      equip berserker
+      activate R
+    :?foe.armor <= 0 & ToActivate("bardiche")
+      equip bardiche
+      activate R
+    :?foe.armor <= 0 & ToActivate(
+    ^"heavy_hammer")
+      equip heavy_hammer
+      activate R
+    :?foe.armor <= 0 & item.CanActivate() &
+    ^item.GetCooldown("mask") <= 0
+      equip mask
+      activate R
+    :?foe.state = 1 & foe.time < 80
+      equipR compound
+      equipL quest
+    :?foe.distance > 10 & foe.distance < 17
+      equipR dash
+    :?foe.debuffs.GetCount("chill") < 6
+      equipL dI sword
+      equipR vigor sword -shiny
+    :
+      equipL vigor sword shiny
+      equipR vigor sword -shiny
+  
+  //Giant Ice Elemental
+  :?foe = boss
+    ?summon.count = 1
+      equipR compound
+      equipL aether talisman
+      activate L
+    :?foe.count > 1
+      equip fire cross
+    :
+      equipL fire hammer
+      equipR fire sword shiny
+
+  :
+    equip fire cross
+
+// MUSHROOM FOREST
+:?loc = mushroom
+  ?loc.stars > 10
+    activate P
+  ?permaprep
+    ?foe.distance > 23
+      equipR mask
+      ?hp < maxhp
+        equipL ouroboros
+      :
+        equipL quest
+    
+    :?foe = phase
+      ?foe.distance < 10 &
+      ^ToActivate("bardiche")
+        equip bardiche
+        activate R
+      :?foe.state = 32 & foe.time = 80
+        equipL mind
+        equipR mask
+      :?foe.debuffs.GetCount("chill") < 6
+        equipL dI sword
+        equipR mask
+      :?hp < maxhp & foe ! phase1
+        equipL dL sword
+        equipR mask
+      :
+        equipL dP sword
+        equipR mask
+    
+    :?foe = boss
+      ?foe = fluff
+        ?foe.distance < 5
+          equipL mind
+          equipR mask
+        :
+          equipR mask
+          equipL poison sword
+      :?foe.distance < 10 &
+      ^ToActivate("bardiche")
+        equip bardiche
+        activate R
+      :
+        equipR mask
+        equipL poison wand
+    :
+      equipR mask
+      ?hp < maxhp
+        equipL dL wand
+      :
+        equipL poison wand
+
+
+  :?(foe.distance > 16 & foe ! phase) |
+  ^foe.distance > 23
+    ?item.GetCooldown("quarterstaff") <= 0
+      equip quarterstaff
+      activate R
+    :?hp < maxhp & string.IndexOf(debuffs.string
+    ^, puff) = -1
+      equipR poison shield
+      equip ouroboros
+    :
+      equipR poison shield
+      equipL trisk
+  
+  :?foe.distance > 10 & foe.distance < 17 &
+  ^item.GetCooldown("bash") <= 0 &
+  ^item.GetCooldown("mind") < 330
+    equipR bash
+  :?foe.distance > 10 & foe.distance < 17 &
+  ^item.GetCooldown("dash") <= 0 &
+  ^item.GetCooldown("mind") < 330
+    equipR dash
+
+  //Angry Shroom
+  :?foe = phase
+    ?foe.count = 2
+      enoki_time += 1
+      ?last_armor > armor + 1
+        enoki_hit_count += 1
+        enoki_hit_time = enoki_time
+        enoki_time = 0
+      last_armor = armor
+      >@enoki_hit_count@, @enoki_hit_time@
+    ?enoki_hit_count = 1 & enoki_time >= 16 |
+    ^enoki_time >= 58
+      >EQUIP!
+      equipR compound
+      equipL poison D sword
+    :?foe.distance < 10 &
+    ^ToActivate("bardiche")
+      equip bardiche
+      activate R
+    :?foe.state = 32 & foe.time = 80
+      equipR mask
+      activate R
+    :?foe.debuffs.GetCount("chill") < 6
+      Moonjuggle("poison D sword",
+      ^"dI sword")
+    :?foe.armor > 0
+      equipL poison hammer
+      equipR poison D sword
+    :
+      Moonjuggle("dP sword",
+      ^"poison D sword")
+  
+  //Mr. Puff and Boss Snail
+  :?foe = boss
+    ?foe = fluff
+      ?foe.distance < 5
+        equipR mind
+      :
+        equipR compound
+        equipL poison sword
+    :?foe.distance < 10 &
+    ^ToActivate("bardiche")
+      equip bardiche
+      activate R
+    :?foe.debuffs.GetCount("chill") < 6
+      equipL poison sword
+      equipR dI sword
+    :
+      equipL poison sword
+      equipR compound
+
+  :
+    equipL poison wand
+    equipR poison wand shiny
+
+//CAVES OF FEAR
+:?loc = caves
+  ?loc.stars > 10
+    activate P
+  ?permaprep
+    ?foe.distance > 23
+      equipR mask
+      ?hp < maxhp
+        equipL ouroboros
+      :
+        equipL quest
+    :?foe = phase
+      ?buffs.GetTime("berserk") > 3
+        ?foe.debuffs.GetCount("chill") < 6
+          equipL dI wand shiny
+          equipR dI wand -shiny
+        :
+          equip ice crossbow
+      :
+        equipL ice wand shiny
+        equipR mask
+    :?foe = boss
+      equipR mask
+      equipL fire hammer
+    :
+      equipR mask
+      equipL ice wand shiny
+  
+  :?(foe.distance > 16 & foe ! phase) |
+  ^foe.distance > 23
+    ?item.GetCooldown("quarterstaff") <= 0
+      equip quarterstaff
+      activate R
+    :?hp < maxhp
+      equipR ice shield
+      equip ouroboros
+    :
+      equipR ice shield
+      equipL trisk
+  
+  :?foe = phase
+    ?foe.buffs.count >= 3 & item.GetCooldown(
+    ^"wand_vigor") <= 0 & armor >= 1
+      equipR reset wand
+      activate R
+    :?foe.debuffs.GetCount("chill") < 6
+      equipR dI wand -shiny
+      equipL dI wand shiny
+    :
+      equip ice crossbow
+  
+  :?foe.distance > 10 & foe.distance < 17 &
+  ^item.GetCooldown("bash") <= 0 &
+  ^item.GetCooldown("mind") < 330
+    equipR bash
+  :?foe.distance > 10 & foe.distance < 17 &
+  ^item.GetCooldown("dash") <= 0 &
+  ^item.GetCooldown("mind") < 330
+    equipR dash
+    
+  :
+    equipR dI wand -shiny
+    equipL dI wand shiny
+
+//DEADWOOD CANYON
+:?loc = deadwood
+  ?foe.distance > 23
+    ?item.GetCooldown("quarterstaff") <= 0
+      equip quarterstaff
+      activate R
+    :?hp < maxhp
+      equipR compound
+      equip ouroboros
+    :
+      equipR compound
+      equipL trisk
+
+  //Xyloalgia
+  ?foe = phase
+    ?loc.stars < 11
+      ?foe.state = 33 & foe.time < 5
+        ?ToActivate("shovel")
+          equip shovel
+          activate R
+        :?item.GetCooldown("mind") <= 0
+          equipR mind
+      :
+        equip repeat
+    :?summon.count = 1
+      equipR compound
+      equipL aether talisman
+      activate L
+    :?foe = phase2
+      ?foe.buffs.GetCount("mirror") > 0
+        ?item.GetCooldown("wand_vigor") <= 0 &
+        ^armor >= 1 & armor.f >= 1
+          equipR reset
+          activate R
+          equipL fire Hammer
+        :
+          equipL quest
+          equipR compound
+      :?item.GetCooldown("bash") <= 0 &
+      ^foe.distance > 10
+        equipR bash
+        equipL quest
+      :?foe.debuffs.GetCount("stun") > 0
+        equipR dI sword
+        equipL fire Hammer
+      :?item.GetCooldown("wand_ice") <= 0 &
+      ^ armor > 6
+        equipR frost wand
+        equipL dI sword
+        activate R
+      :?item.GetCooldown("bardiche") <= 0 |
+      ^ item.GetCooldown("bardiche") >= 870
+        equip bard
+        activate R
+      :?hp < maxhp
+        equipR dI sword
+        equipL dL sword
+      :
+        equipR dI sword
+        equipL fire Hammer
+    :?foe.hp <= 13
+      equipR bash
+      equipL quest
+    :?foe.state = 32 & ToActivate("shovel")
+      equip shovel
+      activate R
+    :?foe.state = 33 & foe.time > 3 &
+    ^foe.time < 18
+      ?item.GetCooldown("mind") <= 0
+        equipR mind
+      :?item.GetCooldown("quarterstaff") <= 0
+        equip quarterstaff
+        activate R
+      :
+        equipR compound
+        equipL trisk
+    :
+      Moonjuggle("dL sword", "dI sword")
+
+  :?foe = wasp
+    equip repeat
+  :
+    equipL dU sword shiny
+    equipR dU sword -shiny
+  
+  ?hp < 6 | (hp < foe.damage & foe.state = 32)
+    activate P
+
+
+// ROCKY PLATEAU
+
+:?loc = rocky
+  disable npcDialogue
+  ?permaprep
+    >@foe.GetCount(200)@,@foe.distance@
+    //?buffs.GetCount("lucky") > 0
+    //  >@buffs.string@
+  ?permaprep & foe.GetCount(200) <= 1 &
+  ^foe.distance > 20 & foe.distance > 0
+    equipR mask
+    equipL ouro
+    activate P
+  :?foe.distance > 20
+    equipL trisk
+    equipR compound
+  :?foe.distance > 10 & foe.distance < 17 &
+  ^item.GetCooldown("dash") <= 0 &
+  ^item.GetCooldown("mind") < 330
+    equipR dash
+
+  :?foe = phase
+    ?permaprep
+      equipR mask
+      ?foe.debuffs.GetCount("chill") < 6 &
+      ^foe.buffs.GetCount("buff_protection") = 0
+        equipL dI sword
+      :?foe.debuffs.GetCount(
+      ^"debuff_damage") < 1 &
+      ^foe.buffs.GetCount("buff_protection") = 0
+        equipL dP sword
+      :?hp < maxhp
+        equipL dL sword
+      :?foe = phase1
+        equipL Heat Wave
+      :?foe = phase2
+        weaponL = GetCounter() + 
+        ^" sword shiny -big"
+        equipL @weaponL@
+      :?foe = phase3
+        ?foe.state = 32 & foe.time = 40 &
+        ^foe.damage = 1
+          dysmind = true
+        ?foe.state = 115 & foe.time =
+        ^70 - foe.distance
+          dysmind = true
+        ?dysmind
+          equipL mind
+          dysmind = false
+        :?string.IndexOf(foe.buffs.string,
+        ^"fire") ! -1
+          equipL poison sword shiny
+        :
+          equipL fire sword shiny
+
+    :?armor > 8 &
+    ^item.GetCooldown("staff_aether") <= 0 & 
+    ^item.GetCooldown("bardiche") <= 0
+      equip grasping staff
+      activate R
+    :?buffs.GetCount("range") &
+    ^ToActivate("bardiche")
+      equip bardiche
+      activate R
+    :
+      ?foe.debuffs.GetCount("chill") < 6 &
+      ^foe.buffs.GetCount("buff_protection") = 0
+        weaponR = "dI sword"
+      :?foe.debuffs.GetCount(
+      ^"debuff_damage") < 1 &
+      ^foe.buffs.GetCount("buff_protection") = 0
+        weaponR = "dP sword"
+      :?hp < maxhp
+        weaponR = "dL sword"
+      :
+        weaponR = ""
+      ?foe = phase1
+        weaponL = "Heat Wave"
+        ?string.Equals(weaponR, "")
+          weaponR = "Cold Snap"
+      :?foe = phase2
+        dyselem = GetCounter()
+        weaponL = dyselem + " sword shiny D -big"
+        ?string.Equals(weaponR, "")
+          weaponR = dyselem + 
+          ^" sword D -shiny -big"
+      :?foe = phase3
+        ?loc.stars > 5
+          activate P
+        ?string.IndexOf(foe.buffs.string,
+        ^"fire") ! -1
+          weaponL = "aether sword shiny -big"
+          ?string.Equals(weaponR, "")
+            weaponR = "aether sword -shiny -big"
+        :
+          weaponL = "fire D sword shiny"
+          ?string.Equals(weaponR, "")
+            weaponR = "fire D sword -shiny"
+        ?foe.state = 115 & foe.time =
+        ^70 - foe.distance
+          dysmind = true
+        ?foe.state = 32 & foe.time = 40 &
+        ^foe.damage = 1
+          dysmind = true
+      ?dysmind
+        equipL mind
+        dysmind = false
+      :
+        Moonjuggle(weaponL, weaponR)
+
+  :?foe = boss
+    ?foe.distance < 10 & ToActivate("bardiche")
+      equip bardiche
+      activate R
+    :?foe.state = 32 & foe.distance > 6
+      equip repeat
+    :
+      Moonjuggle("Heat Wave", "Cold Snap")
+  :?foe = monarch
+    ?item.GetCooldown("blade") <= 0
+      equip blade
+      activate R
+    :?foe.GetCount(20) > 1
+      equip heavy hammer
+    :
+      Moonjuggle("Heat Wave","Cold Snap")
+  :?foe = acronian_soldier & foe.state = 32 & foe.time = 14 & (armor > 0 | armor.f > 0)
+    equipR towering
+    equipL dU sword shiny
+  :
+    equipL dU sword shiny
+    equipR dU sword -shiny
+
+
+// DEFAULTS
+
+// Item abilities
+
+:?foe.distance < 25 & foe ! nagaraja &
+^item.GetCooldown("mask") <= 0 & foe.armor <= 0
+^& item.CanActivate() & foe = phase
+  equipR mask
+  activate R
+
+// Armor and Recovery
+:?foe.distance > 17 & foe ! guardian
+  ?item.GetCooldown("quarterstaff") <= 0
+    equip quarterstaff
+    activate R
+  shield = GetCounter()
+  ? !string.Equals(shield,"")
+    shield += " shield"
+    equipR @shield@
+    equipL trisk
+  :?hp < maxhp & string.IndexOf(debuffs.string,
+  ^puff) = -1
+    equipR compound
+    equip ouroboros
+  :
+    equipR compound
+    equipL trisk
+
+:?foe.distance > 10 & foe.distance <= 17 &
+^item.GetCooldown("bash") <= 0 &
+^item.GetCooldown("mind") < 330
+  equipR bash
+:?foe.distance > 10 & foe.distance <= 17 &
+^item.GetCooldown("dash") <= 0 &
+^item.GetCooldown("mind") < 330
+  equipR dash
+
+// Boss-related Debuffs
+:?string.IndexOf(debuffs.string,
+^"pallas") ! -1
+  equipL vigor wand -hidden
+  ?foe.distance > 22 - 2 * debuffs.count
+    equipR vigor shield
+  :
+    equipR dL wand
+
+
+// Bosses
+// TODO: Split up phase and boss blocks
+
+:?foe = boss
+  >@foe.state@, @foe.time@
+  
+  ?foe = bomb_cart
+    ?foe.distance < 5
+      equipR mind
+    :?item.GetCooldown("mind") = 0
+      equipR dash
+  
+  :?(foe.distance < 10 |
+  ^buffs.GetCount("range") > 0) &
+  ^(item.GetCooldown("bardiche") <= 0 |
+  ^item.GetCooldown("bardiche") > 870)
+    equip bardiche
+    activate R
+  
+  :?loc = boiling
+    ?foe = scout
+      equipL fire hammer
+      equipR dI
+    :?foe ! bomb_cart
+      activate P
+      ?item.GetCooldown("staff_aether") <= 0 &
+      ^armor >= 2
+        equip grasping staff
+        activate R
+      :?foe.state = 33 & foe.time < 180
+        ?foe.distance > 10 & buffs.GetCount(
+        ^"range") = 0
+          equipL trisk
+          equipR dash
+        :?foe.armor > 0
+          equipR aether hammer
+          equipL aether Hammer +11
+        :
+          Moonjuggle("aether sword -big shiny",
+          ^"aether sword -big -shiny")
+      :?ToActivate("heavy_hammer") &
+      ^foe.armor > 0
+        equip Heavy Hammer
+        activate R
+      :
+        equip aether crossbow
+        ?foe.state = 32 & foe.time = 30
+          equipR mind
+
+  :?loc = haunted
+    ?foe.state = 32
+      ?foe = phase2 & foe.time = 15
+        equip prevention staff
+        activate R
+      :?foe.time = 65
+        equipR mind
+    :?armor <= 14
+      equipR compound
+    :
+      equipR dL vigor wand
+    equipL vigor wand -hidden
+  
+  :?loc = temple
+    equipR compound
+    ?foe.state = 112 & foe.time = 55
+      equipL mind
+    :
+      equipL ice sword
+
+
+// Other Misc. and Default Equips
+
+:?loc = boiling
+  equip aether crossbow
+:?foe = immune_to_physical
+  equipL D vigor wand -hidden
+  equipR dL vigor wand
+/*:?hp < maxhp
+  equipR compound
+  ?foe = immune_to_ranged
+    equipL dL sword
+  :
+    equipL dL wand*/
+:?foe = poison
+  ?loc = caves
+    equipR ice shield
+  :
+    equipR compound
+  equipL shiny ice wand
+:
+  equip repeat
+
+
+
+?loc = tid_q_brn
+  disable npcDialogue
+
+//   _______________________________________
+// |'
+// | CHEST TRACKER
+// '._______________________________________
+
+var skullgame_started = false
+var skully_x = 0
+var skully_y = 0
+var bchest_x = ［39, 45, 51］
+var bchest_y = ［3, 6, 9］
+var sk_scan_x = ［-2, -1, 0, 0, 1, 2］
+var sk_scan_y = ［0, -1, -1, 1, 1, 0］
+var sx = 0
+var sy = 0
+var bchest_char = "ε"
+var skully_char = ascii
+"
+asciiend
+var glow_color = "rainFF"
+var c = -1
+var cx = 0
+var cy = 0
+var tracker = ascii
+###TREASURE
+##\##|##|##/
+.##◀#▼##▼#▶##.
+#`▲########▲´
+──▶########◀──
+asciiend
+
+func ChestVisible()
+  for i = 0 .. bchest_x.Count()-1
+    ?draw.GetSymbol(bchest_x［i］, bchest_y［i］) = 
+    ^ bchest_char
+      return i
+  return -1
+
+func SkullySearch(x, y)
+  for i = 0 .. sk_scan_x.Count()-1
+    sx = skully_x + sk_scan_x［i］
+    sy = skully_y + sk_scan_y［i］
+    ?skully_char = draw.GetSymbol(sx, sy)
+      skully_x = sx
+      skully_y = sy
+      return true
+  return false
+
+?loc = crypt_intro
+  disable npcDialogue
+  ? !skullgame_started
+    c = ChestVisible()
+    ?c ! -1
+      cx = bchest_x［c］
+      cy = bchest_y［c］
+      >@skully_char@
+      ?skully_char = draw.GetSymbol(cx + 3, cy)
+        >TRUE
+        skully_x = cx + 3
+        skully_y = cy
+        skullgame_started = true
+  :
+    ?draw.GetSymbol(skully_x, skully_y) !
+    ^ skully_char
+      SkullySearch(skully_x, skully_y)
+    >`@skully_x-6@,@skully_y-5@,#@glow_color@,
+    ^@tracker@
+    >`0,@screen.h-2@,#@glow_color@,TRACKER ON
