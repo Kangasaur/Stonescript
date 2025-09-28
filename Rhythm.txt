@@ -1450,6 +1450,7 @@ func ButtonDown(btn)
   HandleDownstroke(laneBtns.IndexOf(btn))
 
 func ButtonUp(btn)
+  >@laneBtns.IndexOf(btn)@
   HandleUpstroke(laneBtns.IndexOf(btn))
 
 func IncrOffset(btn)
@@ -1635,7 +1636,7 @@ func InitGame()
     line_y = 8
   :
     laneWidth = 15
-    line_y = 5
+    line_y = 6
   frameOffset = storage.Get("RTHM_FRAME_OFFSET", 0)
   doSFX = storage.Get("RTHM_SFX", false)
   for i = 0..score_save_keys.Count()-1
