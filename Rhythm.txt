@@ -1450,6 +1450,7 @@ func ButtonDown(btn)
   HandleDownstroke(laneBtns.IndexOf(btn))
 
 func ButtonUp(btn)
+  >@noteOnByLane@
   for i = 0..3
     ?noteOnByLane[i]
       HandleUpstroke(i)
