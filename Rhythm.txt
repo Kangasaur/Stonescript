@@ -1091,6 +1091,8 @@ var decrBtn
 var mapIndex = 0
 var setBindings = 0
 var binds = [["←", "↓", "↑", "→"],["D", "F", "J", "K"],["H", "J", "K", "L"]]
+var lastInputLane = -1
+var inputLane = -1
 var doSFX = false
 var menuTime = 0
 var menuOn = false
@@ -1377,23 +1379,46 @@ func ToggleBindings()
       keyText[i].text = binds[setBindings][i]
   
 func HandleInputs()
-  ?key = leftBegin
-    HandleDownstroke(0)
-  ?key = downBegin
-    HandleDownstroke(1)
-  ?key = upBegin
-    HandleDownstroke(2)
-  ?key = rightBegin
-    HandleDownstroke(3)
-    
-  ?key = leftEnd
-    HandleUpstroke(0)
-  ?key = downEnd
-    HandleUpstroke(1)
-  ?key = upEnd
-    HandleUpstroke(2)
-  ?key = rightEnd
-    HandleUpstroke(3)
+  ?sys.isPC
+    ?key = leftBegin
+      HandleDownstroke(0)
+    ?key = downBegin
+      HandleDownstroke(1)
+    ?key = upBegin
+      HandleDownstroke(2)
+    ?key = rightBegin
+      HandleDownstroke(3)
+      
+    ?key = leftEnd
+      HandleUpstroke(0)
+    ?key = downEnd
+      HandleUpstroke(1)
+    ?key = upEnd
+      HandleUpstroke(2)
+    ?key = rightEnd
+      HandleUpstroke(3)
+  :
+    inputLane = InputToLane()
+    >@inputLane@
+    ?inputLane ! -1
+      ?key = primaryBegin
+        HandleDownstroke(inputLane)
+      :?key = primaryEnd
+        for i = 0..3
+          ?noteOnByLane[i]
+            HandleUpstroke(i)
+      :?inputLane ! lastInputLane
+        for i = 0..3
+          ?noteOnByLane[i]
+            HandleUpstroke(i)
+        HandleDownstroke(inputLane)
+      
+      
+
+func InputToLane()
+  ?key = primary & input.x > -(laneWidth * 3 / 2) & input.x < laneWidth * 3 / 2
+    return (input.x + (laneWidth * 3 / 2)) / laneWidth
+  return -1
 
 func HandleDownstroke(lane)
   ?doSFX
@@ -1447,15 +1472,12 @@ func HandleUpstroke(lane)
       holdNoteObjects.RemoveAt(holdNoteObjects.IndexOf(holdObject))
 
 func ButtonDown(btn)
-  HandleDownstroke(laneBtns.IndexOf(btn))
+  ?sys.isPC
+    HandleDownstroke(laneBtns.IndexOf(btn))
 
 func ButtonUp(btn)
-  >@noteOnByLane@
-  for i = 0..3
-    ?noteOnByLane[i]
-      HandleUpstroke(i)
-      return
-  HandleUpstroke(laneBtns.IndexOf(btn))
+  ?sys.isPC
+    HandleUpstroke(laneBtns.IndexOf(btn))
 
 func IncrOffset(btn)
   ?frameOffset < 5
