@@ -1412,7 +1412,7 @@ func HandleInputs()
           ?noteOnByLane[i]
             HandleUpstroke(i)
         HandleDownstroke(inputLane)
-      
+      lastInputLane = inputLane
       
 
 func InputToLane()
