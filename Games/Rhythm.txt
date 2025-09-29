@@ -4,12 +4,17 @@ a stonescript rhythm game by Kangasaur
 
 version: 0.1 (ALPHA)
 
-This is a playtest build -- it is not final
+This is a playtest build -- it is not final!
 To play: type "import Games/Rhythm" and go to Deadwood Waterfall
 
 Mobile users: this script is too long for the Mind Stone
 and mobile clipboards to handle. To play, set your import URL to
-my github page: "
+my github page:
+"https://raw.githubusercontent.com/Kangasaur/Stonescript/refs/heads/main/"
+
+(see https://discord.com/channels/423242655498240000/597668520888762388/1234924102897107044
+for guidance on setting up imports on mobile. For this script, you don't need the
+local server; just set the file string to the URL above)
 */
 
 var note_sprites = [ascii
@@ -1099,7 +1104,6 @@ var setBindings = 0
 var binds = [["←", "↓", "↑", "→"],["D", "F", "J", "K"],["H", "J", "K", "L"]]
 var lastInputLane = -1
 var inputLane = -1
-var pressColor = #202020
 var doSFX = false
 var menuTime = 0
 var menuOn = false
@@ -1418,6 +1422,11 @@ func HandleInputs()
           HandleUpstroke(i)
       HandleDownstroke(inputLane)
     lastInputLane = inputLane
+  for i = 0..3
+    ?i = inputLane
+      laneCanvs[i].Set(" ")
+    :
+      laneCanvs[i].Set("#")
       
 
 func InputToLane()
@@ -1979,6 +1988,20 @@ func InitSongUI()
     newPnl.color = #505050
     laneBtns.Add(newPnl)
     songUIPanel.Add(newPnl)
+    
+    var newCnv = ui.AddCanvas()
+    newCnv.w = laneWidth - 2
+    newCnv.anchor = bottom_center
+    newCnv.dock = bottom_center
+    newCnv.y = -2
+    newCnv.h = (screen.h / 2) - line_y + 10
+    newCnv.SetBG(#202020)
+    for i = 0..8
+      for x = 0..newCnv.w
+        newCnv.SetBG(x, i, color.Lerp(#000000, #181818, i/8.0))
+    newCnv.Set("#")
+    newPnl.Add(newCnv)
+    laneCanvs.Add(newCnv)
     
     var newText = ui.AddText()
     newText.dock = bottom_center
