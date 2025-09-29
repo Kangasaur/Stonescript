@@ -1416,9 +1416,9 @@ func HandleInputs()
       
 
 func InputToLane()
-  ?key = primary & input.x + (screen.w / 2) > -(laneWidth * 3 / 2) &
-  ^ input.x + (screen.w / 2) < laneWidth * 3 / 2
-    return (input.x + (screen.w / 2) + (laneWidth * 3 / 2)) / laneWidth
+  ?key = primary & input.x - (screen.w / 2) > -(laneWidth * 3 / 2) &
+  ^ input.x - (screen.w / 2) < laneWidth * 3 / 2
+    return (input.x - (screen.w / 2) + (laneWidth * 3 / 2)) / laneWidth
   return -1
 
 func HandleDownstroke(lane)
