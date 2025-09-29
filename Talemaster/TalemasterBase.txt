@@ -1,9 +1,0 @@
-/*
-The Talemaster
-an interactive fiction engine for Stonescript
-by Kangasaur
-*/
-
-var roomList
-var itemList
-var objectList

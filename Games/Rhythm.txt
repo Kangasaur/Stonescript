@@ -2,9 +2,14 @@
 Dark World Disco
 a stonescript rhythm game by Kangasaur
 
-version: 0.1 (alpha)
+version: 0.1 (ALPHA)
 
+This is a playtest build -- it is not final
 To play: type "import Games/Rhythm" and go to Deadwood Waterfall
+
+Mobile users: this script is too long for the Mind Stone
+and mobile clipboards to handle. To play, set your import URL to
+my github page: "
 */
 
 var note_sprites = [ascii
@@ -1077,6 +1082,7 @@ var evalLine
 var scoreTxt
 var comboTxt
 var laneBtns = []
+var laneCanvs = []
 var keyText = []
 var tempoText
 var songQuitBtn
@@ -1093,6 +1099,7 @@ var setBindings = 0
 var binds = [["←", "↓", "↑", "→"],["D", "F", "J", "K"],["H", "J", "K", "L"]]
 var lastInputLane = -1
 var inputLane = -1
+var pressColor = #202020
 var doSFX = false
 var menuTime = 0
 var menuOn = false
@@ -1379,40 +1386,38 @@ func ToggleBindings()
       keyText[i].text = binds[setBindings][i]
   
 func HandleInputs()
-  ?sys.isPC
-    ?key = leftBegin
-      HandleDownstroke(0)
-    ?key = downBegin
-      HandleDownstroke(1)
-    ?key = upBegin
-      HandleDownstroke(2)
-    ?key = rightBegin
-      HandleDownstroke(3)
-      
-    ?key = leftEnd
-      HandleUpstroke(0)
-    ?key = downEnd
-      HandleUpstroke(1)
-    ?key = upEnd
-      HandleUpstroke(2)
-    ?key = rightEnd
-      HandleUpstroke(3)
-  :
-    inputLane = InputToLane()
-    >@inputLane@
-    ?inputLane ! -1
-      ?key = primaryBegin
-        HandleDownstroke(inputLane)
-      :?key = primaryEnd
-        for i = 0..3
-          ?noteOnByLane[i]
-            HandleUpstroke(i)
-      :?inputLane ! lastInputLane
-        for i = 0..3
-          ?noteOnByLane[i]
-            HandleUpstroke(i)
-        HandleDownstroke(inputLane)
-      lastInputLane = inputLane
+  ?key = leftBegin
+    HandleDownstroke(0)
+  ?key = downBegin
+    HandleDownstroke(1)
+  ?key = upBegin
+    HandleDownstroke(2)
+  ?key = rightBegin
+    HandleDownstroke(3)
+    
+  ?key = leftEnd
+    HandleUpstroke(0)
+  ?key = downEnd
+    HandleUpstroke(1)
+  ?key = upEnd
+    HandleUpstroke(2)
+  ?key = rightEnd
+    HandleUpstroke(3)
+  
+  inputLane = InputToLane()
+  ?inputLane ! -1
+    ?key = primaryBegin
+      HandleDownstroke(inputLane)
+    :?key = primaryEnd
+      for i = 0..3
+        ?noteOnByLane[i]
+          HandleUpstroke(i)
+    :?inputLane ! lastInputLane
+      for i = 0..3
+        ?noteOnByLane[i]
+          HandleUpstroke(i)
+      HandleDownstroke(inputLane)
+    lastInputLane = inputLane
       
 
 func InputToLane()
@@ -1471,14 +1476,6 @@ func HandleUpstroke(lane)
       holdObject[0].Recycle()
       holdObject.Clear()
       holdNoteObjects.RemoveAt(holdNoteObjects.IndexOf(holdObject))
-
-func ButtonDown(btn)
-  ?sys.isPC
-    HandleDownstroke(laneBtns.IndexOf(btn))
-
-func ButtonUp(btn)
-  ?sys.isPC
-    HandleUpstroke(laneBtns.IndexOf(btn))
 
 func IncrOffset(btn)
   ?frameOffset < 5
@@ -1975,18 +1972,13 @@ func InitSongUI()
   songUIPanel.Add(songBallSprite)
   
   for i = 0 .. 3
-    var newBtn = ui.AddButton()
-    newBtn.h = screen.h + 4
-    newBtn.w = laneWidth
-    newBtn.x = -(laneWidth * 3 / 2) + laneWidth * i
-    newBtn.text = ""
-    newBtn.bcolor = #505050
-    newBtn.hcolor = #202020
-    newBtn.sound = ""
-    newBtn.SetDown(ButtonDown)
-    newBtn.SetUp(ButtonUp)
-    laneBtns.Add(newBtn)
-    songUIPanel.Add(newBtn)
+    var newPnl = ui.AddPanel()
+    newPnl.h = screen.h + 4
+    newPnl.w = laneWidth
+    newPnl.x = -(laneWidth * 3 / 2) + laneWidth * i
+    newPnl.color = #505050
+    laneBtns.Add(newPnl)
+    songUIPanel.Add(newPnl)
     
     var newText = ui.AddText()
     newText.dock = bottom_center
