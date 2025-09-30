@@ -1096,9 +1096,14 @@ var songBallSprite
 
 var testUIPanel
 var offsetLabel
+var lineLabel
 var offsetTxt
 var incrBtn
 var decrBtn
+var songOffsetLabel
+var songOffsetTxt
+var songIncrBtn
+var songDecrBtn
 
 var mapIndex = 0
 var setBindings = 0
@@ -1115,6 +1120,7 @@ var laneWidth
 var startTime = 0
 var stopTime = 0
 var frameOffset = 0
+var songStartOffset = 0
 var queueTime = 0
 var currentMap = ""
 var mapIndex = 0
@@ -1487,13 +1493,23 @@ func IncrOffset(btn)
   ?frameOffset < 5
     frameOffset++
     storage.Set("RTHM_FRAME_OFFSET", frameOffset)
-    offsetTxt.text = " " + frameOffset + " "
+    offsetTxt.text = "" + frameOffset
 
 func DecrOffset(btn)
   ?frameOffset > -5
     frameOffset--
     storage.Set("RTHM_FRAME_OFFSET", frameOffset)
-    offsetTxt.text = " " + frameOffset + " "
+    offsetTxt.text = "" + frameOffset
+    
+func IncrSongOffset(btn)
+  songStartOffset++
+  storage.Set("RTHM_SONG_OFFSET", songStartOffset)
+  songOffsetTxt.text = "" + songStartOffset
+
+func DecrSongOffset(btn)
+  songStartOffset--
+  storage.Set("RTHM_SONG_OFFSET", songStartOffset)
+  songOffsetTxt.text = "" + songStartOffset
 
 func SelectPrevSong(btn)
   mapIndex--
@@ -1680,8 +1696,9 @@ func InitGame()
     line_y = 8
   :
     laneWidth = 15
-    line_y = 8
+    line_y = 6
   frameOffset = storage.Get("RTHM_FRAME_OFFSET", 0)
+  songStartOffset = storage.Get("RTHM_SONG_OFFSET", 0)
   doSFX = storage.Get("RTHM_SFX", false)
   for i = 0..score_save_keys.Count()-1
     map_scores[i] = storage.Get(score_save_keys[i], 0)
@@ -1946,7 +1963,7 @@ func InitMenuUI()
 func InitTestUI()
   testUIPanel = ui.AddPanel()
   testUIPanel.w = 13
-  testUIPanel.h = 5
+  testUIPanel.h = 11
   testUIPanel.dock = center_right
   testUIPanel.anchor = center_right
   testUIPanel.x = -2
@@ -1959,17 +1976,27 @@ func InitTestUI()
   offsetLabel.dock = top_center
   testUIPanel.Add(offsetLabel)
   
+  lineLabel = ui.AddText("Visual Sync")
+  lineLabel.color = #white
+  lineLabel.w = 13
+  lineLabel.align = center
+  lineLabel.h = 1
+  lineLabel.y = -3
+  testUIPanel.Add(lineLabel)
+  
   offsetTxt = ui.AddText()
   offsetTxt.h = 1
+  offsetTxt.y = -1
   offsetTxt.color = #white
   offsetTxt.align = center
-  offsetTxt.text = " " + frameOffset + " "
+  offsetTxt.text = "" + frameOffset
   testUIPanel.Add(offsetTxt)
   
   incrBtn = ui.AddButton()
   incrBtn.w = 3
   incrBtn.h = 3
   incrBtn.x = 3
+  incrBtn.y = -1
   incrBtn.SetPressed(IncrOffset)
   incrBtn.text = "»"
   testUIPanel.Add(incrBtn)
@@ -1978,9 +2005,44 @@ func InitTestUI()
   decrBtn.w = 3
   decrBtn.h = 3
   decrBtn.x = -3
+  decrBtn.y = -1
   decrBtn.SetPressed(DecrOffset)
   decrBtn.text = "«"
   testUIPanel.Add(decrBtn)
+  
+  songOffsetLabel = ui.AddText("Song Sync")
+  songOffsetLabel.color = #white
+  songOffsetLabel.w = 13
+  songOffsetLabel.align = center
+  songOffsetLabel.h = 1
+  songOffsetLabel.y = 1
+  testUIPanel.Add(songOffsetLabel)
+  
+  songOffsetTxt = ui.AddText()
+  songOffsetTxt.h = 1
+  songOffsetTxt.y = 3
+  songOffsetTxt.color = #white
+  songOffsetTxt.align = center
+  songOffsetTxt.text = "" + songStartOffset
+  testUIPanel.Add(songOffsetTxt)
+  
+  songIncrBtn = ui.AddButton()
+  songIncrBtn.w = 3
+  songIncrBtn.h = 3
+  songIncrBtn.x = 3
+  songIncrBtn.y = 3
+  songIncrBtn.SetPressed(IncrSongOffset)
+  songIncrBtn.text = "»"
+  testUIPanel.Add(songIncrBtn)
+  
+  songDecrBtn = ui.AddButton()
+  songDecrBtn.w = 3
+  songDecrBtn.h = 3
+  songDecrBtn.x = -3
+  songDecrBtn.y = 3
+  songDecrBtn.SetPressed(DecrSongOffset)
+  songDecrBtn.text = "«"
+  testUIPanel.Add(songDecrBtn)
   
   testUIPanel.visible = false
   
@@ -2124,9 +2186,8 @@ func Beatween()
   beatTimeColor = color.Lerp(#white, #323232, curr_between)
 
 func UpdateSong()
-  ?totaltime = startTime - frameOffset
+  ?totaltime = startTime + songStartOffset
     music.Play(currentMap)
-    >"START SONG"
   :?totaltime = stopTime
     music.Stop()
     play air_hiss
