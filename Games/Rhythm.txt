@@ -2126,6 +2126,7 @@ func Beatween()
 func UpdateSong()
   ?totaltime = startTime - frameOffset
     music.Play(currentMap)
+    >"START SONG"
   :?totaltime = stopTime
     music.Stop()
     play air_hiss
