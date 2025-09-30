@@ -1076,6 +1076,7 @@ var gameResultsPanel
 var resultsTitleTxt
 var resultsLabels
 var resultsScoreTxt
+var resultsRankTxt
 var resultsFCTxt
 var perfectsTxt
 var goodsTxt
@@ -1137,7 +1138,6 @@ var tempoChangeText = ""
 var tempoChangeColor = #9FFFFF
 var beatsElapsed = 0
 var beatTimeColor = #white
-
 
 var noteQueue = []
 var messageQueue = []
@@ -1309,10 +1309,7 @@ func EvaluateNote(note)
   var thisScore
   var evaluations
   ?note[1] >= 8
-    ?sys.isPC
-      evaluations = [2, 4, 5]
-    :
-      evaluations = [4, 5, 6]
+    evaluations = [2, 4, 5]
   :
     evaluations = [1, 3, 5]
   var diff = math.Abs((totaltime + frameOffset) - note[2])
@@ -1637,18 +1634,32 @@ func UpdateScores()
   
   ?currentScore >= 1000000
     play treasure_item_lost
+    resultsRankTxt.text = "P"
+    resultsRankTxt.color = #rainFF
   :?currentScore >= 950000
     play treasure_item_red
+    resultsRankTxt.text = "S"
+    resultsRankTxt.color = #red
   :?currentScore >= 900000
     play treasure_item_blue
+    resultsRankTxt.text = "A"
+    resultsRankTxt.color = #blue
   :?currentScore >= 800000
     play treasure_item_green
+    resultsRankTxt.text = "B"
+    resultsRankTxt.color = #green
   :?currentScore >= 700000
     play treasure_item_yellow
+    resultsRankTxt.text = "C"
+    resultsRankTxt.color = #yellow
   :?currentScore >= 600000
     play treasure_item_cyan
+    resultsRankTxt.text = "D"
+    resultsRankTxt.color = #cyan
   :
     play treasure_item_show
+    resultsRankTxt.text = "F"
+    resultsRankTxt.color = #white
   
   gameResultsPanel.visible = true
   resultsFCTxt.visible = lastRunFC
@@ -1865,6 +1876,16 @@ func InitMenuUI()
   resultsScoreTxt.x = -2
   resultsScoreTxt.y = -3
   gameResultsPanel.Add(resultsScoreTxt)
+  
+  resultsRankTxt = ui.AddText("F")
+  resultsRankTxt.color = #white
+  resultsRankTxt.anchor = center_left
+  resultsRankTxt.dock = center_left
+  resultsRankTxt.h = 1
+  resultsRankTxt.w = 1
+  resultsRankTxt.x = 2
+  resultsRankTxt.y = -2
+  gameResultsPanel.Add(resultsRankTxt)
   
   resultsFCTxt = ui.AddText("Full Combo!")
   resultsFCTxt.color = #rainFF
@@ -2103,7 +2124,7 @@ func Beatween()
   beatTimeColor = color.Lerp(#white, #323232, curr_between)
 
 func UpdateSong()
-  ?totaltime = startTime - 1
+  ?totaltime = startTime - frameOffset
     music.Play(currentMap)
   :?totaltime = stopTime
     music.Stop()
