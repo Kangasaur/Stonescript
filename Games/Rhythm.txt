@@ -1110,6 +1110,8 @@ var setBindings = 0
 var binds = [["←", "↓", "↑", "→"],["D", "F", "J", "K"],["H", "J", "K", "L"]]
 var lastInputLane = -1
 var inputLane = -1
+var songTip = "TIP: If the song or notes seem out of sync, you can try\nadjusting options in the Test Play menu."
+var songTipTimer = 0
 var doSFX = false
 var menuTime = 0
 var menuOn = false
@@ -1174,6 +1176,9 @@ func AnimateTitle()
   menuBallY = SlideTowardY(menuBallSprite, menuBallY, 2, 0.15)
   ?menuTime >= 10
     titleX = SlideTowardX(titleSprite, titleX, 4, 0.075)
+
+func DisplaySongTip()
+  songTipTimer = 90
 
 func EnqueueNote(noteTime, noteType)
   ?noteType = -1
@@ -1614,6 +1619,8 @@ func StartTest()
   fcTxt.visible = false
 
 func QuitSong()
+  ? !storage.Has("RTHM_SONG_OFFSET")
+    DisplaySongTip()
   startTime = 0
   stopTime = 0
   tempoChanges.Clear()
@@ -1676,6 +1683,9 @@ func UpdateScores()
     play treasure_item_show
     resultsRankTxt.text = "F"
     resultsRankTxt.color = #white
+    
+  ?currentScore < 700000 & !storage.Has("RTHM_SONG_OFFSET")
+    DisplaySongTip()
   
   gameResultsPanel.visible = true
   resultsFCTxt.visible = lastRunFC
@@ -2259,6 +2269,9 @@ func DisplaySongUI()
     UpdateTest()
     DisplaySongUI()
   :
+    ?songTipTimer > 0
+      songTipTimer--
+      >`0,0,#FFFF00,@songTip@
     ? !menuOn
       AnimateTitle()
       ?menuTime = 0 | menuTime = 12
