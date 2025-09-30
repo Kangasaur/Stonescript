@@ -1998,7 +1998,7 @@ func InitSongUI()
     newCnv.SetBG(#202020)
     for i = 0..8
       for x = 0..newCnv.w
-        newCnv.SetBG(x, i, color.Lerp(#000000, #181818, i/8.0))
+        newCnv.SetBG(x, i, color.Lerp(#000000, #202020, i/8.0))
     newCnv.Set("#")
     newPnl.Add(newCnv)
     laneCanvs.Add(newCnv)
