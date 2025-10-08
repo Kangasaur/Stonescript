@@ -2,10 +2,10 @@
 Dark World Disco
 a stonescript rhythm game by Kangasaur
 
-version: 0.1 (ALPHA)
+version: 1.0 - StoneJam 8 submission
 
-This is a playtest build -- it is not final!
-To play: type "import Games/Rhythm" and go to Deadwood Waterfall
+To play: type "import Games/Rhythm" into your Mind Stone
+and go to Deadwood Waterfall.
 
 Mobile users: this script is too long for the Mind Stone
 and mobile clipboards to handle. To play, set your import URL to
@@ -3119,7 +3119,8 @@ func DisplaySongUI()
       MoveTowardX(anims[i], (i - mapIndex) * 19, 2)
   ?isPlaying
     UpdateSong()
-    DisplaySongUI()
+    ?isPlaying
+      DisplaySongUI()
   :?isTesting
     UpdateTest()
     DisplaySongUI()
