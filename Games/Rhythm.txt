@@ -3,6 +3,7 @@ Dark World Disco
 a stonescript rhythm game by Kangasaur
 
 version: 1.0 - StoneJam 8 submission
+version: 1.1 - day 1 bug fixes
 
 To play: type "import Games/Rhythm" into your Mind Stone
 and go to Deadwood Waterfall.
@@ -2290,7 +2291,7 @@ func TranslateSongSpeed(beats)
 
 func SelectPrevSong(btn)
   mapIndex--
-  nextSongBtn.visible = true
+  nextSongBtn.visible = inherit
   gameResultsPanel.visible = false
   resultsFCTxt.visible = false
   ?mapIndex = 0
@@ -2299,7 +2300,7 @@ func SelectPrevSong(btn)
 
 func SelectNextSong(btn)
   mapIndex++
-  prevSongBtn.visible = true
+  prevSongBtn.visible = inherit
   gameResultsPanel.visible = false
   resultsFCTxt.visible = false
   ?mapIndex = 14
